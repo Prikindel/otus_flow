@@ -544,6 +544,7 @@ fun stateFlow() {
     }
 }
 
+/*
 fun main() {
     runBlocking {
         val myFlow = flow {
@@ -576,4 +577,4 @@ fun main() {
                 println("Received value: $value")
             }
     }
-}
+}*/
