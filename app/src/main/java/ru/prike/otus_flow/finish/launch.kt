@@ -544,13 +544,12 @@ fun stateFlow() {
     }
 }
 
-/*
 fun main() {
     runBlocking {
         val myFlow = flow {
             emit(1)
             emit(2)
-//            throw Exception("Something went wrong")
+            throw Exception("Something went wrong")
             emit(3)
         }
 
@@ -563,6 +562,7 @@ fun main() {
 //        }
 
         myFlow
+            .map { "$it" }
             .onCompletion { cause ->
                 if (cause != null) {
                     println("Flow completed exceptionally with: ${cause.message}")
@@ -577,4 +577,4 @@ fun main() {
                 println("Received value: $value")
             }
     }
-}*/
+}

@@ -4,6 +4,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 import ru.prike.otus_flow.app.domain.AnimalController
 import ru.prike.otus_flow.app.model.AnimalState
@@ -12,8 +16,8 @@ class AnimalViewModel(
     private val controller: AnimalController = AnimalController()
 ): ViewModel() {
 
-    private val _state = MutableLiveData(AnimalState.Default)
-    val state: LiveData<AnimalState> get() = _state
+    private val _state = MutableStateFlow(AnimalState.Default)
+    val state: StateFlow<AnimalState> get() = _state.asStateFlow()
 
     init {
         loadAnimals()
@@ -47,7 +51,7 @@ class AnimalViewModel(
     }
 
     private fun updateState(update: AnimalState.() -> AnimalState) {
-        _state.value = _state.value?.update()
+        _state.value = _state.value.update()
     }
 
 }

@@ -1,5 +1,9 @@
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package ru.prike.otus_flow.started
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -11,11 +15,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flatMapMerge
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.zip
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import ru.prike.otus_flow.Animal
 import kotlin.system.measureTimeMillis
 
@@ -24,7 +30,19 @@ import kotlin.system.measureTimeMillis
 }*/
 
 fun flow_builders() {
+    runBlocking {
+        println("1) ")
+        flow {
+            emit(Animal.Cat)
+            emit(Animal.Dog)
+        }.collect { animal -> println("$animal received")}
 
+        println("2)")
+        flowOf(Animal.Cat, Animal.Dog).collect { animal -> println("$animal received")}
+
+        println("3)")
+        Animal.entries.asFlow().collect { animal -> println("$animal received")}
+    }
 }
 
 /*fun main() {
@@ -33,7 +51,22 @@ fun flow_builders() {
 
 fun flow_basic_intermediate_operators() {
     runBlocking {
-
+        Animal.entries.asFlow()
+            .filterNot { animal -> animal == Animal.Fish }
+            .flatMapConcat { robot ->
+                flow {
+                    emit("Head of $robot")
+                    emit("Body of $robot")
+                    emit("Hands of $robot")
+                    emit("Legs of $robot")
+                }
+            }.onStart { println("Start") }
+            .flowOn(Dispatchers.IO)
+            .collect { part ->
+                withContext(Dispatchers.Main) {
+                    println("$part received")
+                }
+            }
     }
 }
 
@@ -65,13 +98,35 @@ private fun flowOfAnimals(delay: Long = 0L, withLog: Boolean = false) = flow {
     if (withLog) println("  After emit Bird")
 }
 
-/*fun main() {
+fun main() {
     flow_flatMap()
-}*/
+}
 
 fun flow_flatMap() {
     runBlocking {
+        val flow1 = flowOfNumbers(n = 3, delay = 30L)
+        val flow2 = flowOfAnimals(delay = 20)
 
+        println("flatMapConcat")
+        flow1
+            .flatMapConcat { index ->
+                flow2.map { animal -> "$index - $animal" }
+            }
+            .collect { println("    -> $it") }
+
+        println("flatMapMerge")
+        flow1
+            .flatMapMerge { index ->
+                flow2.map { animal -> "$index - $animal" }
+            }
+            .collect { println("    -> $it") }
+
+        println("flatMapLatest")
+        flow1
+            .flatMapLatest { index ->
+                flow2.map { animal -> "$index - $animal" }
+            }
+            .collect { println("    -> $it") }
     }
 }
 
